@@ -152,7 +152,7 @@ export default function RegisterScreen() {
                 <InputSlot style={{ paddingRight: 12 }} onPress={() => setShowPassword(!showPassword)}>
                   <InputIcon
                     as={showPassword ? Eye : EyeOff} // Ganti ikon berdasarkan state
-                    color="$darkBlue500"
+                    color="#524b4e"
                   />
                 </InputSlot>
               </Input>
@@ -172,7 +172,7 @@ export default function RegisterScreen() {
                 <InputSlot style={{ paddingRight: 12 }} onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
                   <InputIcon
                     as={showConfirmPassword ? Eye : EyeOff} // Ganti ikon berdasarkan state
-                    color="$darkBlue500"
+                    color="#524b4e"
                   />
                 </InputSlot>
               </Input>
