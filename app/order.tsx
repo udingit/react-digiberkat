@@ -5,7 +5,7 @@ import { useToast, Toast, ToastTitle, ToastDescription } from "@/components/ui/t
 import { Icon, CloseIcon, CheckCircleIcon, HelpCircleIcon } from "@/components/ui/icon";
 import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
-import { Pressable } from "@/components/ui/pressable";
+import { Pressable } from "@/components/ui/pressable"; // Ensure Pressable is imported
 import { Center } from '@/components/ui/center'; // Import Center for aligning QR Code
 
 // Import QRCode library
@@ -14,6 +14,7 @@ import QRCode from 'react-native-qrcode-svg';
 import { useGetMyOrdersQuery, useCancelOrderMutation } from '@/src/store/api/orderApi';
 import { format, parseISO } from 'date-fns';
 import { id } from 'date-fns/locale';
+import { router } from 'expo-router'; // Import router for navigation
 
 interface OrderItem {
   order: {
@@ -104,8 +105,8 @@ const Order = () => {
   // --- Handle Show QR Code Toast ---
   const showQrCodeToast = React.useCallback((orderId: number) => {
     toast.show({
-      placement: 'top', // Posisikan di atas layar (gunakan 'top', 'bottom', 'top-right', atau 'bottom-right' sesuai kebutuhan)
-      duration: null, // Biarkan persistent sampai ditutup manual
+      placement: 'top',
+      duration: null,
       render: ({ id }) => (
         <Toast
           action="info"
@@ -115,8 +116,8 @@ const Order = () => {
           <ToastTitle className="font-bold text-blue-600 mb-4">QR Code Pesanan #{orderId}</ToastTitle>
           <Center style={{ marginBottom: 20 }}>
             <QRCode
-              value={String(orderId)} // Data yang akan dienkode (ID pesanan)
-              size={220} // Ukuran QR Code
+              value={String(orderId)}
+              size={220}
               color="black"
               backgroundColor="white"
             />
@@ -132,6 +133,10 @@ const Order = () => {
     });
   }, [toast]);
 
+  // --- Handle Navigate to Order Detail ---
+  const handleViewOrderDetail = React.useCallback((orderId: number) => {
+    router.push(`/order/${orderId}`); // Navigate to the order detail screen
+  }, []);
 
   if (isLoading) {
     return (
@@ -173,6 +178,8 @@ const Order = () => {
         return 'bg-yellow-100 text-yellow-800';
       case 'dibatalkan':
         return 'bg-red-100 text-red-800';
+      case 'expired': // Add expired status
+        return 'bg-gray-200 text-gray-700';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -205,10 +212,16 @@ const Order = () => {
         {ordersData.data.map((orderItem: OrderItem) => {
           const isCurrentOrderCancelling = isCancelling && cancellingOrderId === orderItem.order.id;
           const isCancellable = orderItem.order.status.toLowerCase() === 'pending';
-          const isQRShowable = orderItem.order.status.toLowerCase() === 'pending' || orderItem.order.status.toLowerCase() === 'selesai'; // QR bisa ditunjukkan untuk pending atau selesai
+          const isQRShowable = orderItem.order.status.toLowerCase() === 'pending' || orderItem.order.status.toLowerCase() === 'selesai';
 
           return (
-            <View key={orderItem.order.id} className="p-4">
+            // Wrap the entire order card with TouchableOpacity for navigation
+            <TouchableOpacity
+              key={orderItem.order.id}
+              className="p-4"
+              onPress={() => handleViewOrderDetail(orderItem.order.id)} // Navigate on press
+              activeOpacity={0.7} // Visual feedback on press
+            >
               <Text className="text-sm text-gray-500 mb-2">
                 Dibuat {formatDate(orderItem.order.created_at)}
               </Text>
@@ -238,7 +251,7 @@ const Order = () => {
                   <View className="flex-1">
                     <Text className="font-medium line-clamp-1">{orderItem.sample_item.product_name}</Text>
                     <Text className="text-sm text-gray-500">
-                      {orderItem.sample_item.quantity} Produk
+                      {orderItem.sample_item.quantity} buah
                     </Text>
                   </View>
                 </View>
@@ -256,7 +269,7 @@ const Order = () => {
                   </View>
                   <View className="flex-row space-x-2">
                     {/* Tombol Tunjukan QR */}
-                    {isQRShowable && ( // Hanya tampilkan jika status memungkinkan
+                    {isQRShowable && (
                       <TouchableOpacity
                         className="px-3 py-1 border border-gray-300 rounded-full"
                         onPress={() => showQrCodeToast(orderItem.order.id)}
@@ -286,7 +299,7 @@ const Order = () => {
                   </View>
                 </View>
               </View>
-            </View>
+            </TouchableOpacity>
           );
         })}
       </View>
@@ -295,3 +308,4 @@ const Order = () => {
 };
 
 export default Order;
+

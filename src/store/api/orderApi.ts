@@ -41,6 +41,39 @@ interface OrdersResponse {
   message: string;
 }
 
+// --- NEW INTERFACES FOR ORDER DETAIL ---
+interface ProductVariant {
+  id: number;
+  name: string;
+  price: number;
+  is_discounted: boolean;
+  discount_price: number | null;
+  stock: number;
+}
+
+interface OrderDetailItem {
+  id: number;
+  order_id: number;
+  product_id: number;
+  product_variant_id: number | null;
+  name: string;
+  thumbnails: string[];
+  quantity: number;
+  price: number;
+  price_at_purchase: number;
+  total_price: number;
+  variants?: ProductVariant[]; // Optional, only if product has variants
+}
+
+interface OrderDetailResponse {
+  created_at: string;
+  data: OrderDetailItem[];
+  message: string;
+  status: string;
+  total_order_price: number;
+}
+// --- END NEW INTERFACES ---
+
 export const orderApi = createApi({
   reducerPath: 'orderApi',
   baseQuery: fetchBaseQuery({
@@ -53,7 +86,7 @@ export const orderApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Order'],
+  tagTypes: ['Order', 'OrderDetail'], // Tambahkan 'OrderDetail' ke tagTypes
   endpoints: (builder) => ({
     createOrder: builder.mutation<CreateOrderResponse, void>({
       query: () => ({
@@ -92,8 +125,20 @@ export const orderApi = createApi({
         };
       },
     }),
+    // --- NEW ENDPOINT FOR ORDER DETAIL ---
+    getOrderDetail: builder.query<OrderDetailResponse, number>({
+      query: (id) => `orders/${id}`, // Endpoint dengan ID order
+      providesTags: (result, error, id) => [{ type: 'OrderDetail', id }], // Memberikan tag untuk caching
+      transformErrorResponse: (response: { status: number; data?: { message?: string } }) => {
+        return {
+          status: response.status,
+          message: response.data?.message || 'Gagal mengambil detail order',
+        };
+      },
+    }),
+    // --- END NEW ENDPOINT ---
   }),
 });
 
 // Export the new hook along with existing ones
-export const { useCreateOrderMutation, useGetMyOrdersQuery, useCancelOrderMutation } = orderApi;
+export const { useCreateOrderMutation, useGetMyOrdersQuery, useCancelOrderMutation, useGetOrderDetailQuery } = orderApi;
