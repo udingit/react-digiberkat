@@ -39,7 +39,7 @@ export const productsApi = createApi({
       { userQuery: string; products: Product[] } // Payload yang dikirim ke API
     >({
       query: ({ userQuery, products }) => ({
-        url: 'http://localhost:8001/api/v1/recommend', // <--- PASTE URL NGROK ANDA DI SINI
+        url: 'https://digiberkat-production.up.railway.app/api/v1/recommend', // <--- PASTE URL NGROK ANDA DI SINI
         method: 'POST',
         body: { userQuery, products },
       }),
