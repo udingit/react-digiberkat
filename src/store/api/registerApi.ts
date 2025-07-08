@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 export const registerApi = createApi({
   reducerPath: 'registerApi',
-  baseQuery: fetchBaseQuery({ 
+  baseQuery: fetchBaseQuery({
     baseUrl: 'https://digiberkat-production.up.railway.app/api/v1/',
     prepareHeaders: (headers) => {
       headers.set('Content-Type', 'application/json');
@@ -12,10 +12,10 @@ export const registerApi = createApi({
   }),
   endpoints: (builder) => ({
     registerUser: builder.mutation({
-      query: (credentials: { 
-        username: string; 
-        email: string; 
-        password: string 
+      // Ubah 'email' menjadi 'username' jika email memang digunakan sebagai username
+      query: (credentials: {
+        username: string; // Seharusnya ini yang dikirim, isinya bisa email
+        password: string;
       }) => ({
         url: 'register/user',
         method: 'POST',
